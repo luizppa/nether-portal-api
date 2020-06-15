@@ -1,6 +1,7 @@
 const AWS = require('aws-sdk')
 const AWS_CONFIG = require('../lib/aws_config')
 const Log = require('../models/log')
+const minecraft = require('../lib/minecraft')
 
 exports.open = (req, res) => {
     AWS.config.update({credentials: AWS_CONFIG.credentials(), region: process.env.AWS_EC2_REGION})
@@ -16,7 +17,7 @@ exports.open = (req, res) => {
         }
         else {
             let instance = data.StartingInstances[0]
-            if(instance.PreviousState.Name == 'stopped'){
+            if(instance.PreviousState.Name == 'stopped' || instance.PreviousState.Name == 'stopping'){
                 Log.create({
                     action: 'Start',
                     time: new Date(),
@@ -68,7 +69,7 @@ exports.close = (req, res) => {
         }
         else {
             let instance = data.StoppingInstances[0]
-            if(instance.PreviousState.Name == 'running'){
+            if(instance.PreviousState.Name == 'running' || instance.PreviousState.Name == 'pending'){
                 Log.create({
                     action: 'Stop',
                     time: new Date(),
@@ -94,14 +95,20 @@ exports.status = (_req, res) => {
         }
         else{
             const instance = data.Reservations[0].Instances[0]
-            let instance_data = {
+            let instance_info = {
                 endpoint: instance.PrivateDnsName,
                 ip: instance.PublicIpAddress,
                 status: instance.State.Name,
                 launch_time: instance.LaunchTime
             }
-            console.log(instance_data);
-            res.status(200).send(instance_data)
+            minecraft.status(instance_info.ip,
+                (minecraft_info) => {
+                    res.status(200).send({instance_info, minecraft_info})
+                },
+                (error) => {
+                    res.status(406).send(error)
+                } 
+            )
         }
     })
 }
