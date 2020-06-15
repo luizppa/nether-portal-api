@@ -28,6 +28,32 @@ exports.open = (req, res) => {
     })
 }
 
+exports.reboot = (req, res) => {
+    AWS.config.update({credentials: AWS_CONFIG.credentials(), region: process.env.AWS_EC2_REGION})
+    const EC2 = new AWS.EC2({apiVersion: '2016-11-15'})
+
+    var params = {
+        InstanceIds: [process.env.EC2_INSTANCE_ID]
+    }
+    EC2.rebootInstances(params, (err, data) => {
+        if (err){
+            console.log(err, err.stack)
+            res.status(406).send(err)
+        }
+        else {
+            let instance = data.RebootingInstances[0]
+            if(instance.PreviousState.Name == 'stopped' || instance.PreviousState.Name == 'running'){
+                Log.create({
+                    action: 'Reboot',
+                    time: new Date(),
+                    actor: req.user.name
+                })
+            }
+            res.status(200).send(instance)
+        }
+    })
+}
+
 exports.close = (req, res) => {
     AWS.config.update({credentials: AWS_CONFIG.credentials(), region: process.env.AWS_EC2_REGION})
     const EC2 = new AWS.EC2({apiVersion: '2016-11-15'})
@@ -41,7 +67,7 @@ exports.close = (req, res) => {
             res.status(406).send(err)
         }
         else {
-            let instance = data.StartingInstances[0]
+            let instance = data.StoppingInstances[0]
             if(instance.PreviousState.Name == 'running'){
                 Log.create({
                     action: 'Stop',
