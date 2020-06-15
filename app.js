@@ -1,18 +1,23 @@
-var createError = require('http-errors');
-var express = require('express');
-var path = require('path');
-var cookieParser = require('cookie-parser');
-var logger = require('morgan');
-const aws_config = require('./lib/aws_config')
-
-var index_router = require('./routes/index');
-var server_router = require('./routes/server');
-
-var app = express();
+const createError = require('http-errors')
+const express = require('express')
+const path = require('path')
+const cookieParser = require('cookie-parser')
+const logger = require('morgan')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
 }
+
+const mongoose = require('mongoose')
+mongoose.connect(process.env.DATABASE_URI, {useNewUrlParser: true, useUnifiedTopology: true})
+const db = mongoose.connection
+db.on('error', console.error.bind(console, 'connection error:'))
+db.once('open', () => {})
+
+const index_router = require('./routes/index');
+const server_router = require('./routes/server');
+
+const app = express()
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'))
@@ -24,23 +29,22 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use('/', index_router);
-app.use('/server', server_router);
+app.use('/', index_router)
+app.use('/server', server_router)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
-  next(createError(404));
+  next(createError(404))
 });
 
 // error handler
 app.use(function(err, req, res, next) {
-  // set locals, only providing error in development
-  res.locals.message = err.message;
-  res.locals.error = req.app.get('env') === 'development' ? err : {};
+  
+  res.locals.message = err.message
+  res.locals.error = req.app.get('env') === 'development' ? err : {}
 
-  // render the error page
-  res.status(err.status || 500);
-  res.render('error');
+  res.status(err.status || 500)
+  res.render('error')
 });
 
-module.exports = app;
+module.exports = app
