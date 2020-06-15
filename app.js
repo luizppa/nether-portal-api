@@ -3,6 +3,7 @@ const express = require('express')
 const path = require('path')
 const cookieParser = require('cookie-parser')
 const logger = require('morgan')
+const auth = require('./lib/auth')
 
 if (process.env.NODE_ENV !== 'production') {
   require('dotenv').config()
@@ -28,6 +29,8 @@ app.use(express.json())
 app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
+
+app.use(auth.check_identity)
 
 app.use('/', index_router)
 app.use('/server', server_router)
