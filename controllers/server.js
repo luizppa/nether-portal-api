@@ -1,7 +1,8 @@
 const AWS = require('aws-sdk')
 const AWS_CONFIG = require('../lib/aws_config')
+const Log = require('../models/log')
 
-exports.open = (_req, res) => {
+exports.open = (req, res) => {
     AWS.config.update({credentials: AWS_CONFIG.credentials(), region: process.env.AWS_EC2_REGION})
     const EC2 = new AWS.EC2({apiVersion: '2016-11-15'})
 
@@ -14,13 +15,20 @@ exports.open = (_req, res) => {
             res.status(406).send(err)
         }
         else {
-            console.log(data);
-            res.status(200).send(data.StartingInstances[0])
+            let instance = data.StartingInstances[0]
+            if(instance.PreviousState.Name == 'stopped'){
+                Log.create({
+                    action: 'Start',
+                    time: new Date(),
+                    actor: req.user.name
+                })
+            }
+            res.status(200).send(instance)
         }
     })
 }
 
-exports.close = (_req, res) => {
+exports.close = (req, res) => {
     AWS.config.update({credentials: AWS_CONFIG.credentials(), region: process.env.AWS_EC2_REGION})
     const EC2 = new AWS.EC2({apiVersion: '2016-11-15'})
     
@@ -33,13 +41,20 @@ exports.close = (_req, res) => {
             res.status(406).send(err)
         }
         else {
-            console.log(data);
-            res.status(200).send(data.StoppingInstances[0])
+            let instance = data.StartingInstances[0]
+            if(instance.PreviousState.Name == 'running'){
+                Log.create({
+                    action: 'Stop',
+                    time: new Date(),
+                    actor: req.user.name
+                })
+            }
+            res.status(200).send(instance)
         }
     })
 }
 
-exports.status = (req, res) => {
+exports.status = (_req, res) => {
     AWS.config.update({credentials: AWS_CONFIG.credentials(), region: process.env.AWS_EC2_REGION})
     const EC2 = new AWS.EC2({apiVersion: '2016-11-15'})
 

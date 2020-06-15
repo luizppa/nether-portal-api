@@ -15,8 +15,9 @@ const db = mongoose.connection
 db.on('error', console.error.bind(console, 'connection error:'))
 db.once('open', () => {})
 
-const index_router = require('./routes/index');
-const server_router = require('./routes/server');
+const index_router = require('./routes/index')
+const server_router = require('./routes/server')
+const log_router = require('./routes/log')
 
 const app = express()
 
@@ -34,6 +35,7 @@ app.use(auth.check_identity)
 
 app.use('/', index_router)
 app.use('/server', server_router)
+app.use('/logs', log_router)
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
