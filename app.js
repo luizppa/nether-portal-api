@@ -18,6 +18,7 @@ db.once('open', () => {})
 const index_router = require('./routes/index')
 const server_router = require('./routes/server')
 const log_router = require('./routes/log')
+const waypoint_router = require('./routes/waypoint')
 
 const app = express()
 
@@ -35,6 +36,7 @@ app.use(auth.check_identity)
 app.use('/', index_router)
 app.use('/server', server_router)
 app.use('/logs', log_router)
+app.use('/waypoint', waypoint_router)
 
 app.use(function(req, res, next) {
   next(createError(404))
