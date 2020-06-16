@@ -31,7 +31,7 @@ app.use(express.urlencoded({ extended: false }))
 app.use(cookieParser())
 app.use(express.static(path.join(__dirname, 'public')))
 
-app.use(auth.check_identity)
+app.use(['/server', '/logs', '/waypoint'], auth.check_identity)
 
 app.use('/', index_router)
 app.use('/server', server_router)

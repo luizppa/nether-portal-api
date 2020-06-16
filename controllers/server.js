@@ -1,10 +1,10 @@
 const AWS = require('aws-sdk')
-const AWS_CONFIG = require('../lib/aws_config')
 const Log = require('../models/log')
+const aws_config = require('../lib/aws_config')
 const minecraft = require('../lib/minecraft')
 
 exports.open = (req, res) => {
-    AWS.config.update({credentials: AWS_CONFIG.credentials(), region: process.env.AWS_EC2_REGION})
+    AWS.config.update({credentials: aws_config.credentials(), region: process.env.AWS_EC2_REGION})
     const EC2 = new AWS.EC2({apiVersion: '2016-11-15'})
 
     var params = {
@@ -30,7 +30,7 @@ exports.open = (req, res) => {
 }
 
 exports.reboot = (req, res) => {
-    AWS.config.update({credentials: AWS_CONFIG.credentials(), region: process.env.AWS_EC2_REGION})
+    AWS.config.update({credentials: aws_config.credentials(), region: process.env.AWS_EC2_REGION})
     const EC2 = new AWS.EC2({apiVersion: '2016-11-15'})
 
     var params = {
@@ -56,7 +56,7 @@ exports.reboot = (req, res) => {
 }
 
 exports.close = (req, res) => {
-    AWS.config.update({credentials: AWS_CONFIG.credentials(), region: process.env.AWS_EC2_REGION})
+    AWS.config.update({credentials: aws_config.credentials(), region: process.env.AWS_EC2_REGION})
     const EC2 = new AWS.EC2({apiVersion: '2016-11-15'})
     
     var params = {
@@ -82,7 +82,7 @@ exports.close = (req, res) => {
 }
 
 exports.status = (_req, res) => {
-    AWS.config.update({credentials: AWS_CONFIG.credentials(), region: process.env.AWS_EC2_REGION})
+    AWS.config.update({credentials: aws_config.credentials(), region: process.env.AWS_EC2_REGION})
     const EC2 = new AWS.EC2({apiVersion: '2016-11-15'})
 
     var params = {
@@ -96,7 +96,7 @@ exports.status = (_req, res) => {
         else{
             const instance = data.Reservations[0].Instances[0]
             let instance_info = {
-                endpoint: instance.PrivateDnsName,
+                endpoint: instance.PublicDnsName,
                 ip: instance.PublicIpAddress,
                 status: instance.State.Name,
                 launch_time: instance.LaunchTime
@@ -107,7 +107,7 @@ exports.status = (_req, res) => {
                 },
                 (error) => {
                     res.status(406).send(error)
-                } 
+                }
             )
         }
     })
