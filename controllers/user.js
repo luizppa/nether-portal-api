@@ -2,12 +2,12 @@ const User = require('../models/user')
 
 exports.login = (req, res) => {
     let params = {
-        username: req.body.user.username,
-        key: req.body.user.key
+        username: req.body.username,
+        key: req.body.key
     }
     User.findOne(params, (error, user) => {
         if(error || user == null){
-            return res.status(406).send('No, thanks')
+            return res.status(403).send('No, thanks')
         }
         else{
             User.generate_token(user,
