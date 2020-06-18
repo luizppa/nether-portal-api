@@ -39,18 +39,16 @@ exports.reboot = (req, res) => {
     EC2.rebootInstances(params, (err, data) => {
         if (err){
             console.log(err, err.stack)
-            res.status(406).send(err)
+            if(err.statusCode == 400) return res.status(400).send(err)
+            else return res.status(406).send(err)
         }
         else {
-            let instance = data.RebootingInstances[0]
-            if(instance.PreviousState.Name == 'stopped' || instance.PreviousState.Name == 'running'){
-                Log.create({
-                    action: 'Reboot',
-                    time: new Date(),
-                    actor: req.user.name
-                })
-            }
-            res.status(200).send(instance)
+            Log.create({
+                action: 'Reboot',
+                time: new Date(),
+                actor: req.user.name
+            })
+            res.sendStatus(204)
         }
     })
 }
