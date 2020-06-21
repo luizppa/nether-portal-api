@@ -99,11 +99,16 @@ exports.status = (_req, res) => {
                 status: instance.State.Name,
                 launch_time: instance.LaunchTime
             }
-            minecraft.status(instance_info.ip, process.env.MINECRAFT_PORT,
-                (minecraft_info) => {
-                    res.status(200).send({instance_info, minecraft_info})
-                }
-            )
+            if(instance.State.Name !== 'running'){
+                res.status(200).send({instance_info, minecraft_info: minecraft.offline_data})
+            }
+            else{
+                minecraft.status(instance_info.ip, process.env.MINECRAFT_PORT,
+                    (minecraft_info) => {
+                        res.status(200).send({instance_info, minecraft_info})
+                    }
+                )
+            }
         }
     })
 }
