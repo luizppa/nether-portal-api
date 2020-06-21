@@ -99,12 +99,9 @@ exports.status = (_req, res) => {
                 status: instance.State.Name,
                 launch_time: instance.LaunchTime
             }
-            minecraft.status(instance_info.ip,
+            minecraft.status(instance_info.ip, process.env.MINECRAFT_PORT,
                 (minecraft_info) => {
                     res.status(200).send({instance_info, minecraft_info})
-                },
-                (error) => {
-                    res.status(406).send(error)
                 }
             )
         }
