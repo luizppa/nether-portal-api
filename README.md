@@ -1,4 +1,4 @@
-# nether-portal-api
+# Nether Portal API
 
 ## About
 
